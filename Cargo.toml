@@ -1,0 +1,36 @@
+[package]
+name = "presage"
+description = "A lightweight library for designing event-based systems"
+version = { workspace = true }
+edition = { workspace = true }
+license  = { workspace = true }
+authors  = { workspace = true }
+repository  = { workspace = true }
+categories = ["development-tools"]
+keywords = ["cqrs", "event-based", "command-bus"]
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "__docs"]
+
+[workspace]
+members = ["macros", "examples/todo"]
+
+[workspace.package]
+authors = ["Romain Delamare"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/alightgoesout/presage"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+presage-macros = { path = "./macros", version = "0.1.0", optional = true }
+
+async-trait = "0.1"
+log = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+
+[features]
+default = ["derive"]
+derive = ["dep:presage-macros"]

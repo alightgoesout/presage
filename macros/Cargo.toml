@@ -1,0 +1,16 @@
+[package]
+name = "presage-macros"
+description = "Macros for présage. Should not be used directly."
+version = { workspace = true }
+edition = { workspace = true }
+license  = { workspace = true }
+authors  = { workspace = true }
+repository  = { workspace = true }
+
+[lib]
+proc-macro = true
+
+[dependencies]
+convert_case = "0.6"
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }

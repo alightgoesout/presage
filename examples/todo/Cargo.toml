@@ -1,0 +1,12 @@
+[package]
+name = "presage-examples-todo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+presage = { path = '../..' }
+dialoguer = "0.10.4"
+serde = { version = "1.0.162", features = ["derive"] }
+time = { version = "0.3.21", features = ["serde"] }
+tokio = { version = "1.28.0", features = ["full"] }
+uuid = { version = "1.3.2", features = ["v4", "serde"] }
