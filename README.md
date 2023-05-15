@@ -305,9 +305,8 @@ be configured by providing a `Configuration`.
 let command_bus = CommandBus::new()
     .configure(
         Configuration::new()
-            .event_writer( & some_writer)
-            .event_handler( & some_event_handler)
-            .command_handler( & some_command_handler)
+            .event_handler(&some_event_handler)
+            .command_handler(&some_command_handler)
     );
 ```
 

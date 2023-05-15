@@ -73,27 +73,21 @@ impl TodoContext {
     }
 }
 
-pub struct TodoEventWriter;
-
 #[async_trait]
-impl EventWriter<TodoContext, Error> for TodoEventWriter {
-    fn event_names(&self) -> &[&'static str] {
-        &[TodoCreated::NAME, TodoUpdated::NAME, TodoDeleted::NAME]
-    }
-
-    async fn write(&self, context: &mut TodoContext, event: &SerializedEvent) -> Result<(), Error> {
+impl EventWriter<Error> for TodoContext {
+    async fn write(&mut self, event: &SerializedEvent) -> Result<(), Error> {
         if event.name() == TodoCreated::NAME {
             let todo = Todo::new(event.clone().deserialize()?);
-            context.add(todo)?;
+            self.add(todo)?;
         } else if event.name() == TodoUpdated::NAME {
             let event: TodoUpdated = event.clone().deserialize()?;
-            if let Some(mut todo) = context.get(event.id()) {
+            if let Some(mut todo) = self.get(event.id()) {
                 todo.apply(event);
-                context.update(todo)?;
+                self.update(todo)?;
             }
         } else {
             let event: TodoDeleted = event.clone().deserialize()?;
-            context.delete(event.id());
+            self.delete(event.id());
         }
         Ok(())
     }

@@ -1,6 +1,6 @@
 use presage::Configuration;
 
-use crate::persistence::{TodoContext, TodoEventWriter};
+use crate::persistence::TodoContext;
 use crate::todo::commands::{
     archive_todo, check_todo, create_todo, delete_archived_todos, rename_todo,
 };
@@ -11,7 +11,6 @@ use crate::Error;
 
 pub fn configuration() -> Configuration<TodoContext, Error> {
     Configuration::new()
-        .event_writer(&TodoEventWriter)
         .event_handler(&update_summary_on_todo_created)
         .event_handler(&update_summary_on_todo_updated)
         .event_handler(&update_summary_on_todo_deleted)

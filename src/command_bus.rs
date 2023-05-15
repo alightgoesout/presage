@@ -18,7 +18,6 @@ where
     E: 'static,
 {
     command_handlers: HashMap<&'static str, &'static dyn CommandHandler<C, E>>,
-    event_writers: HashMap<&'static str, &'static dyn EventWriter<C, E>>,
     event_handlers: HashMap<&'static str, Vec<&'static dyn EventHandler<C, E>>>,
 }
 
@@ -33,7 +32,6 @@ impl<C, E> CommandBus<C, E> {
     pub fn new() -> Self {
         Self {
             command_handlers: Default::default(),
-            event_writers: Default::default(),
             event_handlers: Default::default(),
         }
     }
@@ -46,13 +44,11 @@ impl<C, E> CommandBus<C, E> {
     /// let command_bus = presage::CommandBus::new()
     ///     .configure(
     ///         presage::Configuration::new()
-    ///             .event_writer(&some_writer)
     ///             .event_handler(&some_event_handler)
     ///             .command_handler(&some_command_handler)
     ///     );
     /// ```
     pub fn configure(mut self, configuration: Configuration<C, E>) -> Self {
-        self.event_writers.extend(configuration.event_writers);
         self.event_handlers.extend(configuration.event_handlers);
         self.command_handlers.extend(configuration.command_handlers);
         self
@@ -61,6 +57,7 @@ impl<C, E> CommandBus<C, E> {
 
 impl<C, E> CommandBus<C, E>
 where
+    C: EventWriter<E>,
     E: From<Error>,
 {
     /// Executes a [command](Command) with the provided context. If the execution returns any event,
@@ -99,7 +96,7 @@ where
         context: &mut C,
         event: SerializedEvent,
     ) -> Result<Vec<BoxedCommand>, E> {
-        self.write_event(context, &event).await?;
+        context.write(&event).await?;
         let mut commands = Vec::new();
         if let Some(handlers) = self.event_handlers.get(event.name()) {
             for handler in handlers {
@@ -107,19 +104,6 @@ where
             }
         }
         Ok(commands)
-    }
-
-    async fn write_event(&self, context: &mut C, event: &SerializedEvent) -> Result<(), E> {
-        match self.event_writers.get(event.name()) {
-            Some(writer) => writer.write(context, event).await,
-            None => {
-                log::warn!(
-                    "An event of type {} was issued by a command, but no event writer was found to persist it.",
-                    event.name(),
-                );
-                Ok(())
-            }
-        }
     }
 }
 
@@ -131,7 +115,6 @@ where
     fn clone(&self) -> Self {
         Self {
             command_handlers: self.command_handlers.clone(),
-            event_writers: self.event_writers.clone(),
             event_handlers: self.event_handlers.clone(),
         }
     }
@@ -139,17 +122,14 @@ where
 
 /// Persists the modifications of events.
 ///
-/// It can either persist the events or persist the results of applying the events.
+/// It can persist the events, persist the results of applying the events, or a mix of both
+/// approaches.
 ///
 /// # Type arguments
 ///
-/// * `C` - the context for this writer
 /// * `E` - the type of errors returned if the writer fails
 #[async_trait]
-pub trait EventWriter<C, E>: Send + Sync {
-    /// The names of the events the writer is able to persist.
-    fn event_names(&self) -> &[&'static str];
-
+pub trait EventWriter<E>: Send + Sync {
     /// Writes an event.
-    async fn write(&self, context: &mut C, event: &SerializedEvent) -> Result<(), E>;
+    async fn write(&mut self, event: &SerializedEvent) -> Result<(), E>;
 }
