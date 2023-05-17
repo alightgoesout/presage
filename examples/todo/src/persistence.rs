@@ -74,7 +74,9 @@ impl TodoContext {
 }
 
 #[async_trait]
-impl EventWriter<Error> for TodoContext {
+impl EventWriter for TodoContext {
+    type Error = Error;
+
     async fn write(&mut self, event: &SerializedEvent) -> Result<(), Error> {
         if event.name() == TodoCreated::NAME {
             let todo = Todo::new(event.clone().deserialize()?);

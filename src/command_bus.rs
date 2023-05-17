@@ -57,7 +57,7 @@ impl<C, E> CommandBus<C, E> {
 
 impl<C, E> CommandBus<C, E>
 where
-    C: EventWriter<E>,
+    C: EventWriter<Error = E>,
     E: From<Error>,
 {
     /// Executes a [command](Command) with the provided context. If the execution returns any event,
@@ -125,11 +125,14 @@ where
 /// It can persist the events, persist the results of applying the events, or a mix of both
 /// approaches.
 ///
-/// # Type arguments
+/// # Associated type
 ///
-/// * `E` - the type of errors returned if the writer fails
+/// * [`Error`](Self::Error) - the type of errors returned if the writer fails
 #[async_trait]
-pub trait EventWriter<E>: Send + Sync {
+pub trait EventWriter: Send + Sync {
+    /// Error returned when the writer fails
+    type Error;
+
     /// Writes an event.
-    async fn write(&mut self, event: &SerializedEvent) -> Result<(), E>;
+    async fn write(&mut self, event: &SerializedEvent) -> Result<(), Self::Error>;
 }
