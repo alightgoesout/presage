@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::ops::{Add, AddAssign};
 
@@ -62,7 +63,58 @@ impl<C, E> Add for Configuration<C, E> {
 
 impl<C, E> AddAssign for Configuration<C, E> {
     fn add_assign(&mut self, rhs: Self) {
-        self.event_handlers.extend(rhs.event_handlers);
+        for (event, handlers) in rhs.event_handlers {
+            match self.event_handlers.entry(event) {
+                Entry::Occupied(mut entry) => {
+                    entry.get_mut().extend(handlers);
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(handlers);
+                }
+            }
+        }
         self.command_handlers.extend(rhs.command_handlers);
+    }
+}
+
+mod test {
+    use super::*;
+    use crate::{commands, Commands, SerializedEvent};
+    use async_trait::async_trait;
+
+    #[test]
+    fn test_add_assign() {
+        let mut configuration: Configuration<(), ()> =
+            Configuration::default().event_handler(&TestEventHandler1);
+
+        configuration += Configuration::default().event_handler(&TestEventHandler2);
+
+        assert_eq!(configuration.event_handlers["test-event"].len(), 2);
+    }
+
+    struct TestEventHandler1;
+
+    #[async_trait]
+    impl<C, E> EventHandler<C, E> for TestEventHandler1 {
+        fn event_names(&self) -> &[&'static str] {
+            &["test-event"]
+        }
+
+        async fn handle(&self, _: &mut C, _: &SerializedEvent) -> Result<Commands, E> {
+            Ok(commands!())
+        }
+    }
+
+    struct TestEventHandler2;
+
+    #[async_trait]
+    impl<C, E> EventHandler<C, E> for TestEventHandler2 {
+        fn event_names(&self) -> &[&'static str] {
+            &["test-event"]
+        }
+
+        async fn handle(&self, _: &mut C, _: &SerializedEvent) -> Result<Commands, E> {
+            Ok(commands!())
+        }
     }
 }
