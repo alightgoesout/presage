@@ -19,11 +19,11 @@ members = ["macros", "examples/todo"]
 authors = ["Romain Delamare"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/alightgoesout/presage"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [dependencies]
-presage-macros = { path = "./macros", version = "0.2.0", optional = true }
+presage-macros = { path = "./macros", version = "0.3.0", optional = true }
 
 async-trait = "0.1"
 serde = { version = "1.0", features = ["derive"] }

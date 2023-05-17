@@ -255,7 +255,7 @@ checksum = "e0a7ae3ac2f1173085d398531c705756c94a4c56843785df85a60c1a0afac116"
 
 [[package]]
 name = "presage"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "async-trait",
  "presage-macros",
@@ -278,7 +278,7 @@ dependencies = [
 
 [[package]]
 name = "presage-macros"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "convert_case",
  "quote",
