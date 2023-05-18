@@ -53,4 +53,5 @@ pub use event::{AggregateEvent, Event, EventHandler, Events, SerializedEvent};
 pub use presage_macros::{command_handler, event_handler, AggregateEvent, Command, Event};
 
 #[cfg(feature = "derive")]
+#[doc(hidden)]
 pub use async_trait::async_trait;
